@@ -19,8 +19,10 @@ public static class ConfigurationBuilderExtensions
             throw new ArgumentException("The value can be a maximum of 100 characters", nameof(applicationName));
         }
 
-        EntityFrameworkConfiguration.ApplicationName = applicationName;
+        var configurationSource = new EntityFrameworkConfigurationSource(optionsAction);
 
-        return builder.Add(new EntityFrameworkConfigurationSource(optionsAction));
+        EntityFrameworkConfigurationSource.ApplicationName = applicationName;
+
+        return builder.Add(configurationSource);
     }
 }

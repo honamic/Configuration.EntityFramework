@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Honamic.Configuration.EntityFramework.Internal;
 
-internal class AppsetingEntityConfiguration : IEntityTypeConfiguration<Appseting>
+internal class AppsetingEntityConfiguration : IEntityTypeConfiguration<Setting>
 {
-    public virtual void Configure(EntityTypeBuilder<Appseting> builder)
+    public virtual void Configure(EntityTypeBuilder<Setting> builder)
     {
         builder.HasKey(model => model.Id);
 

@@ -10,17 +10,17 @@ internal sealed class EntityFrameworkConfigurationSource : IConfigurationSource
     public readonly Action<DbContextOptionsBuilder> OptionsAction;
     public IJosnConfigurationParser Parser { get; set; }
 
+    public static string? ApplicationName { get; internal set; }
+
 
     public EntityFrameworkConfigurationSource(Action<DbContextOptionsBuilder> optionsAction)
     {
         OptionsAction = optionsAction;
         Parser = new JsonConfigurationParser();
-
-        EntityFrameworkConfiguration.Current = new EntityFrameworkConfigurationProvider(this);
     }
 
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
-        return EntityFrameworkConfiguration.Current;
+        return new EntityFrameworkConfigurationProvider(this);
     }
 }

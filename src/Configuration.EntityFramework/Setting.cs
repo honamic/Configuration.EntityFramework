@@ -1,12 +1,12 @@
 ﻿namespace Honamic.Configuration.EntityFramework;
 
-public class Appseting
+public class Setting
 {
     public int Id { get; set; }
 
     public string? Application { get; set; }
 
-    public string Name { get; set; }
+    public string Name { get; set; } = default!;
 
     public string? Value { get; set; }
 
