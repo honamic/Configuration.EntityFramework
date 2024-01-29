@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Honamic.Configuration.EntityFramework.Internal;
+namespace Honamic.Configuration.EntityFramework.Storages;
 
 internal class EntityFrameworkConfigurationDbContext : DbContext
 {

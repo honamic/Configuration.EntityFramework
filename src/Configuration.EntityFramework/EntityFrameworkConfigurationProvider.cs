@@ -1,11 +1,10 @@
-﻿using Honamic.Configuration.EntityFramework;
-using Honamic.Configuration.EntityFramework.Internal;
-using Honamic.Configuration.EntityFramework.Parser;
+﻿using Honamic.Configuration.EntityFramework.Parser;
+using Honamic.Configuration.EntityFramework.Storages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Text;
 
-namespace Honamic.Extensions.Configuration.EntityFramework;
+namespace Honamic.Configuration.EntityFramework;
 
 internal sealed class EntityFrameworkConfigurationProvider : ConfigurationProvider
 {

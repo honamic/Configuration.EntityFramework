@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Honamic.Configuration.EntityFramework.Internal;
+namespace Honamic.Configuration.EntityFramework.Storages;
 
 internal class SettingEntityTypeConfiguration : IEntityTypeConfiguration<Setting>
 {
