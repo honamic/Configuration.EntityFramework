@@ -14,6 +14,7 @@ internal sealed class EntityFrameworkConfigurationSource : IConfigurationSource,
     public string? ApplicationName { get; set; }
     public string TableName { get; set; } = default!;
     public string? Schema { get; set; }
+    public bool AutoCreateTable { get; set; }
 
     public EntityFrameworkConfigurationSource()
     {

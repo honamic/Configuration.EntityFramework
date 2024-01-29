@@ -25,8 +25,9 @@ var builder = new HostBuilder()
     {
         opt.DbContextOptionsBuilder = (builder) => builder.UseSqlServer(sqlConnectionString);
         opt.ApplicationName = null;
-        //opt.Schema = null;
-        //opt.TableName = null;
+        opt.AutoCreateTable = true;
+        opt.Schema = "basic";
+        opt.TableName = "Options";
     });
 })
 .ConfigureServices((hostContext, services) =>

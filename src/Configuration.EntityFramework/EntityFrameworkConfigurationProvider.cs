@@ -33,6 +33,11 @@ internal sealed class EntityFrameworkConfigurationProvider : ConfigurationProvid
 
         using var storage = new SettingStorage(new EntityFrameworkConfigurationDbContext(builder.Options));
 
+        if (_configurationSource.AutoCreateTable)
+        {
+            storage.CreateSettingTable(_configurationSource.TableName, _configurationSource.Schema);
+        }
+
         Data = ConvertToConfigDictionary(storage.GetAll(_configurationSource.ApplicationName));
     }
 

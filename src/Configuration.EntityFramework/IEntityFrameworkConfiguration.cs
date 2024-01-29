@@ -11,4 +11,7 @@ public interface IEntityFrameworkConfiguration
     public string TableName { get; set; }
 
     public string? Schema { get; set; }
+
+    public bool AutoCreateTable { get; set; }
+
 }
