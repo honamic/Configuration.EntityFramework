@@ -17,10 +17,6 @@ internal class AppsetingEntityConfiguration : IEntityTypeConfiguration<Appseting
                 .IsRequired()
                 .HasMaxLength(450);
 
-        builder.Property(model => model.Key)
-            .IsRequired()
-            .HasMaxLength(450);
-
         builder.Property(model => model.Value)
             .IsRequired(false);
 

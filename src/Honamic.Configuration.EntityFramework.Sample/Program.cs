@@ -1,6 +1,4 @@
-﻿
-using Honamic.Configuration.EntityFramework;
-using Honamic.Configuration.EntityFramework.Extensions;
+﻿using Honamic.Configuration.EntityFramework.Extensions;
 using Honamic.Configuration.EntityFramework.Sample;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,14 +26,12 @@ var builder = new HostBuilder()
 
     services.AddLogging(configure => configure.AddConsole().AddDebug());
     services.AddTransient<ITestService, TestService>();
-  //  services.Configure<SampleOptions>(Configuration.GetSection("ss"));
-   // services.ConfigureByFullNameSection<SampleOptions>(Configuration);
-    services.ConfigureByCustomSection<SampleOptions>(Configuration,"SampleOptions");
+    services.Configure<SampleOptions>(Configuration.GetSection("SampleOptions"));
 });
 
 var host = builder.Build();
 
-EntityFrameworkConfiguration.Current.SeedDefaultOptions();
+// EntityFrameworkConfiguration.Current.SeedDefaultOptions();
 
 //host.Run();
 

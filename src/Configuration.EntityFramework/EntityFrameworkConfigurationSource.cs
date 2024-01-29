@@ -1,17 +1,22 @@
-﻿using Honamic.Extensions.Configuration.EntityFramework;
+﻿using Honamic.Configuration.EntityFramework.Parser;
+using Honamic.Extensions.Configuration.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Honamic.Configuration.EntityFramework;
 
-public class EntityFrameworkConfigurationSource : IConfigurationSource
+internal sealed class EntityFrameworkConfigurationSource : IConfigurationSource
 {
-    private readonly Action<DbContextOptionsBuilder> _optionsAction;
+    public readonly Action<DbContextOptionsBuilder> OptionsAction;
+    public IJosnConfigurationParser Parser { get; set; }
+
 
     public EntityFrameworkConfigurationSource(Action<DbContextOptionsBuilder> optionsAction)
     {
-        _optionsAction = optionsAction;
-        EntityFrameworkConfiguration.Current = new EntityFrameworkConfigurationProvider(_optionsAction);
+        OptionsAction = optionsAction;
+        Parser = new JsonConfigurationParser();
+
+        EntityFrameworkConfiguration.Current = new EntityFrameworkConfigurationProvider(this);
     }
 
     public IConfigurationProvider Build(IConfigurationBuilder builder)

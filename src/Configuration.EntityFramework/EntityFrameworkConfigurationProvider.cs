@@ -1,21 +1,26 @@
-﻿using Honamic.Configuration.EntityFramework;
-using Honamic.Configuration.EntityFramework.Extensions;
+﻿using Consul;
+using Honamic.Configuration.EntityFramework;
 using Honamic.Configuration.EntityFramework.Internal;
+using Honamic.Configuration.EntityFramework.Parser;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
-using System.Security.Claims;
+using System.Text;
 
 namespace Honamic.Extensions.Configuration.EntityFramework;
 
-public class EntityFrameworkConfigurationProvider : ConfigurationProvider
+internal sealed class EntityFrameworkConfigurationProvider : ConfigurationProvider
 {
-    Action<DbContextOptionsBuilder> OptionsAction { get; }
+    private EntityFrameworkConfigurationSource _configurationSource;
 
-    public EntityFrameworkConfigurationProvider(Action<DbContextOptionsBuilder> optionsAction)
+
+    public EntityFrameworkConfigurationProvider(EntityFrameworkConfigurationSource configurationSource)
     {
-        OptionsAction = optionsAction;
+        if (configurationSource.Parser == null)
+        {
+            throw new ArgumentNullException(nameof(configurationSource.Parser));
+        }
+
+        _configurationSource = configurationSource;
     }
 
     public void Reload()
@@ -27,137 +32,56 @@ public class EntityFrameworkConfigurationProvider : ConfigurationProvider
     {
         var builder = new DbContextOptionsBuilder<EntityFrameworkConfigurationDbContext>();
 
-        OptionsAction(builder);
+        _configurationSource.OptionsAction(builder);
 
         using (var dbContext = new EntityFrameworkConfigurationDbContext(builder.Options))
         {
-            CreateAppSettingTable(dbContext);
+            //CreateAppSettingTable(dbContext);
 
-            Data = dbContext.Set<Appseting>()
+
+
+            List<(string Name, string? JsonValue)> settings = dbContext.Set<Appseting>()
                 .Where(option => option.Application == EntityFrameworkConfiguration.ApplicationName)
-                .ToDictionary(option => option.ToKeyName(), option => option.Value);
+                .Select(option => new { option.Name, option.Value })
+                .ToList()
+                 .Select(option => (option.Name, option.Value))
+                 .ToList();
+
+            Data = ToConfigDictionary(settings, _configurationSource.Parser);
         }
     }
 
-    public void SeedDefaultOptions()
+    internal static Dictionary<string, string> ToConfigDictionary(
+                List<(string Name, string? JsonValue)> result,
+               IJosnConfigurationParser parser)
     {
-        var builder = new DbContextOptionsBuilder<EntityFrameworkConfigurationDbContext>();
+        return result
+            .Where(item => !string.IsNullOrEmpty(item.JsonValue))
+            .SelectMany(c => ConvertToConfig(c, parser))
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.OrdinalIgnoreCase);
+    }
 
-        OptionsAction(builder);
+    internal static IEnumerable<KeyValuePair<string, string>> ConvertToConfig(
+           (string Name, string? JsonValue) kvPair,
+           IJosnConfigurationParser parser)
+    {
 
-        using (var dbContext = new EntityFrameworkConfigurationDbContext(builder.Options))
-        {
-            var optionDbSet = dbContext.Set<Appseting>();
-
-            var currentOptions = optionDbSet.ToList();
-
-            string? CurrentUserName = ClaimsPrincipal.Current?.Identity?.Name;
-
-            foreach (var type in EntityFrameworkConfiguration.OptionTypes)
-            {
-                if (type.Value.GetConstructor(Type.EmptyTypes) == null)
-                {
-                    throw new Exception("Only accept types that contain a parameterless constructor. " + type.Value.FullName);
-                }
-                else
-                {
-                    var instance = Activator.CreateInstance(type.Value);
-
-                    var dic = instance.GetPropertiesValues();
-
-                    var sectionName = type.Key;
-
-                    foreach (var property in dic)
+        byte[] byteArray = Encoding.ASCII.GetBytes(kvPair.JsonValue ?? "");
+        using MemoryStream stream = new MemoryStream(byteArray);
+        return parser.Parse(stream)
+              .Select(
+                    pair =>
                     {
-                        if (!currentOptions.Any(option =>
-                           option.Application == EntityFrameworkConfiguration.ApplicationName
-                        && option.Name == sectionName
-                        && option.Key == property.Key))
+                        var key = $"{kvPair.Name}:{pair.Key}"
+                            .Trim(':');
+                        if (string.IsNullOrEmpty(key))
                         {
-                            optionDbSet.Add(
-                                    new Appseting
-                                    {
-                                        Application = EntityFrameworkConfiguration.ApplicationName,
-                                        Name = sectionName,
-                                        Value = property.Value,
-                                        Key = property.Key,
-                                        CreatedOn = DateTimeOffset.Now,
-                                        CreatedBy = CurrentUserName
-                                    }
-                                ); ;
+                            throw new InvalidKeyPairException(
+                                "The key must not be null or empty. Ensure that there is at least one key under the root of the config or that the data there contains more than just a single value.");
                         }
-                    }
-                }
-            }
 
-            dbContext.SaveChanges();
-
-            Data = optionDbSet.ToDictionary(option => option.ToKeyName(), option => option.Value);
-        }
+                        return new KeyValuePair<string, string>(key, pair.Value);
+                    }); 
     }
-
-    public void AddOrUpdateAsync<TOption>(TOption options) where TOption : class
-    {
-        var type = options.GetType();
-
-        var dic = options.GetPropertiesValues();
-
-        var sectionName = type.CreateSectionName();
-
-        var builder = new DbContextOptionsBuilder<EntityFrameworkConfigurationDbContext>();
-
-        OptionsAction(builder);
-
-        using var dbContext = new EntityFrameworkConfigurationDbContext(builder.Options);
-
-
-        var currentOptions = dbContext.Set<Appseting>().Where(option =>
-                        option.Application == EntityFrameworkConfiguration.ApplicationName
-                     && option.Name == sectionName).ToList();
-
-        foreach (var property in dic)
-        {
-            var option = currentOptions.FirstOrDefault(option => option.Key == property.Key);
-
-            if (option == null)
-            {
-                dbContext.Set<Appseting>().Add(
-                        new Appseting
-                        {
-                            Application = EntityFrameworkConfiguration.ApplicationName,
-                            Name = sectionName,
-                            Value = property.Value,
-                            Key = property.Key,
-                            CreatedOn = DateTimeOffset.Now,
-                        }
-                    );
-            }
-            else
-            {
-                option.Value = property.Value;
-                option.ModifiedOn = DateTimeOffset.Now;
-            }
-        }
-
-        dbContext.SaveChanges();
-
-        //reload settings
-        Load();
-    }
-
-    private static void CreateAppSettingTable(EntityFrameworkConfigurationDbContext dbContext)
-    {
-        if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
-        {
-            var query = "SELECT count(*) value  FROM INFORMATION_SCHEMA.TABLES " +
-                       "WHERE TABLE_SCHEMA = 'dbo'  AND  TABLE_NAME = 'AppSettings'";
-            var exitTable = dbContext.Database.SqlQueryRaw<int>(query).FirstOrDefault();
-            if (exitTable != 1)
-            {
-                var databaseCreator = dbContext.GetService<IRelationalDatabaseCreator>();
-                databaseCreator.CreateTables();
-            }
-        }
-    }
-
 }
+

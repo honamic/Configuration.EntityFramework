@@ -3,7 +3,7 @@ using Honamic.Extensions.Configuration.EntityFramework;
 
 namespace Honamic.Configuration.EntityFramework;
 
-public static class EntityFrameworkConfiguration
+internal static class EntityFrameworkConfiguration
 {
     static EntityFrameworkConfiguration()
     {
@@ -13,7 +13,7 @@ public static class EntityFrameworkConfiguration
 
     public static EntityFrameworkConfigurationProvider Current { get; internal set; }
 
-    public static Dictionary<string,Type> OptionTypes { get; internal set; }
+    public static Dictionary<string, Type> OptionTypes { get; internal set; }
 
     public static string? ApplicationName { get; internal set; }
 }

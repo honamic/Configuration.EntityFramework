@@ -8,9 +8,4 @@ public static class EntityFrameworkConfigurationExtensions
     {
         return $"{type.Assembly.GetName().Name},{type.FullName}";
     }
-
-    public static string ToKeyName(this Appseting option)
-    {
-        return $"{option.Name}{ConfigurationPath.KeyDelimiter}{option.Key}";
-    }
 }
