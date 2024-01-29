@@ -1,5 +1,6 @@
 ﻿using Honamic.Configuration.EntityFramework.Extensions;
 using Honamic.Configuration.EntityFramework.Sample;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -18,7 +19,15 @@ var builder = new HostBuilder()
                .AddJsonFile("appsettings.json", true, true)
                .Build();
 
-    builder.AddEntityFrameworkConfiguration(baseConfig.GetConnectionString("AppContext"));
+    var sqlConnectionString = baseConfig.GetConnectionString("AppContext");
+
+    builder.AddEntityFrameworkConfiguration(opt =>
+    {
+        opt.DbContextOptionsBuilder = (builder) => builder.UseSqlServer(sqlConnectionString);
+        opt.ApplicationName = null;
+        //opt.Schema = null;
+        //opt.TableName = null;
+    });
 })
 .ConfigureServices((hostContext, services) =>
 {

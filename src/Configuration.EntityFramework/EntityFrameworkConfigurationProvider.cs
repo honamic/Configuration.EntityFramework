@@ -29,11 +29,11 @@ internal sealed class EntityFrameworkConfigurationProvider : ConfigurationProvid
     {
         var builder = new DbContextOptionsBuilder<EntityFrameworkConfigurationDbContext>();
 
-        _configurationSource.OptionsAction(builder);
+        _configurationSource.DbContextOptionsBuilder(builder);
 
         using var storage = new SettingStorage(new EntityFrameworkConfigurationDbContext(builder.Options));
 
-        Data = ConvertToConfigDictionary(storage.GetAll(EntityFrameworkConfigurationSource.ApplicationName));
+        Data = ConvertToConfigDictionary(storage.GetAll(_configurationSource.ApplicationName));
     }
 
     private Dictionary<string, string> ConvertToConfigDictionary(ICollection<SettingNameValue> result)

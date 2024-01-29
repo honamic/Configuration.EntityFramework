@@ -4,24 +4,31 @@ using Microsoft.Extensions.Configuration;
 
 namespace Honamic.Configuration.EntityFramework;
 
-internal sealed class EntityFrameworkConfigurationSource : IConfigurationSource
+internal sealed class EntityFrameworkConfigurationSource : IConfigurationSource, IEntityFrameworkConfiguration
 {
-    public readonly Action<DbContextOptionsBuilder> OptionsAction;
-    public IJosnConfigurationParser Parser { get; set; }
+    public static EntityFrameworkConfigurationSource? Current { get; private set; }
 
-    public static string? ApplicationName { get; internal set; }
-    public static string TableName { get; internal set; } = "AppSettings";
-    public static string? Schema { get; internal set; }
+    internal IJosnConfigurationParser Parser { get; set; }
 
+    public Action<DbContextOptionsBuilder> DbContextOptionsBuilder { get; set; } = default!;
+    public string? ApplicationName { get; set; }
+    public string TableName { get; set; } = default!;
+    public string? Schema { get; set; }
 
-    public EntityFrameworkConfigurationSource(Action<DbContextOptionsBuilder> optionsAction)
+    public EntityFrameworkConfigurationSource()
     {
-        OptionsAction = optionsAction;
         Parser = new JsonConfigurationParser();
+        TableName = "AppSettings";
+    }
+
+    public EntityFrameworkConfigurationSource(Action<DbContextOptionsBuilder> optionsAction) : this()
+    {
+        DbContextOptionsBuilder = optionsAction;
     }
 
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
-        return new EntityFrameworkConfigurationProvider(this);
+        Current = this;
+        return new EntityFrameworkConfigurationProvider(Current);
     }
 }

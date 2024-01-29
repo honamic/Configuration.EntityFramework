@@ -5,23 +5,31 @@ namespace Honamic.Configuration.EntityFramework.Extensions;
 
 public static class ConfigurationBuilderExtensions
 {
-    public static IConfigurationBuilder AddEntityFrameworkConfiguration(this IConfigurationBuilder builder, string SqlConnectionString)
+    public static IConfigurationBuilder AddSqlServerEntityFrameworkConfiguration(this IConfigurationBuilder builder, string SqlConnectionString)
     {
-        return builder.AddEntityFrameworkConfiguration(options => options.UseSqlServer(SqlConnectionString));
+        return builder.AddEntityFrameworkConfiguration(opt =>
+        {
+            opt.DbContextOptionsBuilder = (builder) => builder.UseSqlServer(SqlConnectionString);
+        });
     }
 
+
     public static IConfigurationBuilder AddEntityFrameworkConfiguration(this IConfigurationBuilder builder,
-            Action<DbContextOptionsBuilder> optionsAction,
-            string? applicationName = null)
+            Action<IEntityFrameworkConfiguration> optionsAction)
     {
-        if (applicationName?.Length > 100)
+        var configurationSource = new EntityFrameworkConfigurationSource();
+      
+        optionsAction.Invoke(configurationSource);
+
+        if (configurationSource.ApplicationName?.Length > 100)
         {
-            throw new ArgumentException("The value can be a maximum of 100 characters", nameof(applicationName));
+            throw new ArgumentException("The value can be a maximum of 100 characters", nameof(configurationSource.ApplicationName));
         }
 
-        var configurationSource = new EntityFrameworkConfigurationSource(optionsAction);
-
-        EntityFrameworkConfigurationSource.ApplicationName = applicationName;
+        if ( configurationSource.DbContextOptionsBuilder.ToString()=="")
+        {
+            throw new ArgumentException("The value must be configured.", nameof(configurationSource.DbContextOptionsBuilder));
+        }
 
         return builder.Add(configurationSource);
     }

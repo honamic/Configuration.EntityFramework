@@ -13,8 +13,8 @@ internal class EntityFrameworkConfigurationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        var settingTypeConfiguration = new SettingEntityTypeConfiguration(EntityFrameworkConfigurationSource.TableName
-                                                        , EntityFrameworkConfigurationSource.Schema);
+        var settingTypeConfiguration = new SettingEntityTypeConfiguration(EntityFrameworkConfigurationSource.Current.TableName
+                                                        , EntityFrameworkConfigurationSource.Current.Schema);
         modelBuilder.ApplyConfiguration(settingTypeConfiguration);
     }
 }
