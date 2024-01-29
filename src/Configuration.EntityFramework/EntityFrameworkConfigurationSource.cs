@@ -11,6 +11,8 @@ internal sealed class EntityFrameworkConfigurationSource : IConfigurationSource
     public IJosnConfigurationParser Parser { get; set; }
 
     public static string? ApplicationName { get; internal set; }
+    public static string TableName { get; internal set; } = "AppSettings";
+    public static string? Schema { get; internal set; }
 
 
     public EntityFrameworkConfigurationSource(Action<DbContextOptionsBuilder> optionsAction)

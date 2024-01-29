@@ -3,8 +3,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Honamic.Configuration.EntityFramework.Internal;
 
-internal class AppsetingEntityConfiguration : IEntityTypeConfiguration<Setting>
+internal class SettingEntityTypeConfiguration : IEntityTypeConfiguration<Setting>
 {
+    private string TableName;
+    private string? Schema = null;
+
+    public SettingEntityTypeConfiguration(string tableName, string? schema)
+    {
+        TableName = tableName;
+        Schema = schema;
+    }
+
     public virtual void Configure(EntityTypeBuilder<Setting> builder)
     {
         builder.HasKey(model => model.Id);
@@ -28,6 +37,6 @@ internal class AppsetingEntityConfiguration : IEntityTypeConfiguration<Setting>
                .IsRequired(false)
                .HasMaxLength(50);
 
-        builder.ToTable("AppSettings");
+        builder.ToTable(TableName, Schema);
     }
 }
