@@ -1,4 +1,4 @@
-﻿namespace Honamic.Configuration.EntityFramework;
+﻿namespace Honamic.Configuration.EntityFramework.Storages;
 
 public class SettingNameValue
 {

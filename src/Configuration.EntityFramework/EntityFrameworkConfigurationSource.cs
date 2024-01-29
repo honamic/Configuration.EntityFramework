@@ -1,5 +1,4 @@
 ﻿using Honamic.Configuration.EntityFramework.Parser;
-using Honamic.Extensions.Configuration.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 

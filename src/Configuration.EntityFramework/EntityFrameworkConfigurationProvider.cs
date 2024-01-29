@@ -31,17 +31,12 @@ internal sealed class EntityFrameworkConfigurationProvider : ConfigurationProvid
 
         _configurationSource.OptionsAction(builder);
 
-        using var dbContext = new EntityFrameworkConfigurationDbContext(builder.Options);
+        using var storage = new SettingStorage(new EntityFrameworkConfigurationDbContext(builder.Options));
 
-        var settings = dbContext.Set<Setting>()
-             .Where(option => option.Application == EntityFrameworkConfigurationSource.ApplicationName)
-             .Select(option => new SettingNameValue(option.Name, option.Value))
-             .ToList();
-
-        Data = ConvertToConfigDictionary(settings);
+        Data = ConvertToConfigDictionary(storage.GetAll(EntityFrameworkConfigurationSource.ApplicationName));
     }
 
-    private Dictionary<string, string> ConvertToConfigDictionary(List<SettingNameValue> result)
+    private Dictionary<string, string> ConvertToConfigDictionary(ICollection<SettingNameValue> result)
     {
         return result
             .Where(item => !string.IsNullOrEmpty(item.JsonValue))
