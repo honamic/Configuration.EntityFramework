@@ -16,7 +16,7 @@ internal sealed class EntityFrameworkConfigurationSource : IConfigurationSource,
     public string TableName { get; set; } = default!;
     public string? Schema { get; set; }
     public bool AutoCreateTable { get; set; }
-
+    public Action? Reload { get; private set; }
 
     public EntityFrameworkConfigurationSource()
     {
@@ -33,6 +33,8 @@ internal sealed class EntityFrameworkConfigurationSource : IConfigurationSource,
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
         Current = this;
-        return new EntityFrameworkConfigurationProvider(Current);
+        var provider = new EntityFrameworkConfigurationProvider(Current);
+        Current.Reload = provider.Reload;
+        return provider;
     }
 }

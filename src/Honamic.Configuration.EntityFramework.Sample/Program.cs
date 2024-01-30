@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 
 IConfiguration Configuration = null;
@@ -65,6 +66,15 @@ using (var serviceScope = host.Services.CreateScope())
 
     testService.Run();
     await changeOptionService.Change();
+    //Configuration.GetReloadToken().RegisterChangeCallback(c =>
+    //{
+    //    Debugger.Break();
+    //}, null);
+
+    //var configRoot = Configuration as IConfigurationRoot;
+
+    //configRoot.Reload();
+
     testService.Run();
 
 }

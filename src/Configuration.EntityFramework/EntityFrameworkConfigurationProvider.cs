@@ -23,6 +23,7 @@ internal sealed class EntityFrameworkConfigurationProvider : ConfigurationProvid
     public void Reload()
     {
         Load();
+        OnReload();
     }
 
     public override void Load()

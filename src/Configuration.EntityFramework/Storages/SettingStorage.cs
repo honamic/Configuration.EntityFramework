@@ -78,7 +78,7 @@ public class SettingStorage : IDisposable
 
         dbContext.SaveChanges();
     }
-    
+
     public async Task<Setting?> GetAsync(string sectionName, string? applicationName)
     {
         return await dbContext.Set<Setting>().FirstOrDefaultAsync(option =>
@@ -115,6 +115,11 @@ public class SettingStorage : IDisposable
         }
 
         dbContext.SaveChanges();
+        
+        if (EntityFrameworkConfigurationSource.Current?.Reload != null)
+        {
+            EntityFrameworkConfigurationSource.Current.Reload();
+        }
     }
 
     public void UpdateAsync<TOption>(Setting updateSetting)
