@@ -86,7 +86,7 @@ public class SettingStorage : IDisposable
                         && option.Name == sectionName);
     }
 
-    public void AddOrUpdateAsync<TOption>(TOption options, string sectionName, string? applicationName) where TOption : class
+    public void AddOrUpdate<TOption>(TOption options, string sectionName, string? applicationName) where TOption : class
     {
         string? CurrentUserName = ClaimsPrincipal.Current?.Identity?.Name;
 
@@ -115,18 +115,20 @@ public class SettingStorage : IDisposable
         }
 
         dbContext.SaveChanges();
-        
-        if (EntityFrameworkConfigurationSource.Current?.Reload != null)
-        {
-            EntityFrameworkConfigurationSource.Current.Reload();
-        }
+
+        Reload();
     }
 
-    public void UpdateAsync<TOption>(Setting updateSetting)
+    public async Task UpdateAsync(Setting updateSetting)
     {
+        if (!string.IsNullOrEmpty(updateSetting.Value) && !IsValidJson(updateSetting.Value))
+        {
+            throw new ArgumentException("the value must be json", nameof(updateSetting.Value));
+        }
+
         string? CurrentUserName = ClaimsPrincipal.Current?.Identity?.Name;
 
-        var currentSetting = dbContext.Set<Setting>().FirstOrDefault(option =>
+        var currentSetting = await dbContext.Set<Setting>().FirstOrDefaultAsync(option =>
                         option.Id == updateSetting.Id);
 
         if (currentSetting == null)
@@ -142,7 +144,9 @@ public class SettingStorage : IDisposable
             currentSetting.ModifiedBy = CurrentUserName;
         }
 
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
+
+        Reload();
     }
 
     public void Dispose()
@@ -163,5 +167,26 @@ public class SettingStorage : IDisposable
     private static string SerializeSetting(object? instance)
     {
         return JsonSerializer.Serialize(instance);
+    }
+
+    private static void Reload()
+    {
+        if (EntityFrameworkConfigurationSource.Current?.Reload != null)
+        {
+            EntityFrameworkConfigurationSource.Current.Reload();
+        }
+    }
+
+    bool IsValidJson(string jsonString)
+    {
+        try
+        {
+            var jsonDocument = JsonDocument.Parse(jsonString);
+            return false;
+        }
+        catch (Exception exc)
+        {
+            return false;
+        }
     }
 }

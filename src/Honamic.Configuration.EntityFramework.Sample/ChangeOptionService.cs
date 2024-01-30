@@ -27,12 +27,14 @@ public class ChangeOptionService : IChangeOptionService
 
     public async Task Change()
     {
-        var setting= await settingStorage.GetAsync("SampleOptions", null);
+        var setting = await settingStorage.GetAsync("SampleOptions", null);
 
         var option = JsonSerializer.Deserialize<SampleOptions>(setting.Value);
-        
         option.Title = $"Changed at {DateTime.Now:s}";
+        settingStorage.AddOrUpdate(option, "SampleOptions", null);
 
-        settingStorage.AddOrUpdateAsync(option, "SampleOptions", null);
+        //setting.Value = null;
+        //await settingStorage.UpdateAsync(setting);
+
     }
 }
