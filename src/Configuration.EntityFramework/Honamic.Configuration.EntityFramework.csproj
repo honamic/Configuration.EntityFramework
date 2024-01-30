@@ -1,10 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Description>Provides support for configuring .NET Core applications with EntityFramework</Description>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<Version>1.0.0</Version>
+
+		<PackageId>Honamic.Configuration.EntityFramework</PackageId>
+		<PackageProjectUrl>https://github.com/honamic/Configuration.EntityFramework</PackageProjectUrl>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<Description>Provides support for configuring .NET Core applications with EntityFramework</Description>
+		<authors>Honamic</authors>
+		<licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<PackageTags>configuration;entityframework</PackageTags>
+
 	</PropertyGroup>
 
 
