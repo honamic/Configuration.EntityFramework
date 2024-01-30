@@ -1,7 +1,5 @@
 # Configuration.EntityFramework
 EntityFramework configuration provider 
-
-# SepidarApi
 <p align="left">
   <a href="https://github.com/honamic/Configuration.EntityFramework">
      <img alt="GitHub Actions status" src="https://github.com/honamic/Configuration.EntityFramework/actions/workflows/build.yml/badge.svg">
