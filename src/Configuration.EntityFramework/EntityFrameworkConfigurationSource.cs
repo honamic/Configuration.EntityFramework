@@ -10,16 +10,19 @@ internal sealed class EntityFrameworkConfigurationSource : IConfigurationSource,
 
     internal IJosnConfigurationParser Parser { get; set; }
 
+    public Dictionary<string, Type> InitializeTypes { get; set; }
     public Action<DbContextOptionsBuilder> DbContextOptionsBuilder { get; set; } = default!;
     public string? ApplicationName { get; set; }
     public string TableName { get; set; } = default!;
     public string? Schema { get; set; }
     public bool AutoCreateTable { get; set; }
 
+
     public EntityFrameworkConfigurationSource()
     {
         Parser = new JsonConfigurationParser();
         TableName = "AppSettings";
+        InitializeTypes = new Dictionary<string, Type>();
     }
 
     public EntityFrameworkConfigurationSource(Action<DbContextOptionsBuilder> optionsAction) : this()

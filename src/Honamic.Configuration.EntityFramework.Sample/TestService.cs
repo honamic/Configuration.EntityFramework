@@ -15,10 +15,10 @@ public class TestService : ITestService
     private readonly IOptionsMonitor<SampleOptions> options;
 
     public TestService(ILogger<TestService> logger,
-        IOptionsMonitor<SampleOptions> sepidarOptions)
+        IOptionsMonitor<SampleOptions> options)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        this.options = sepidarOptions;
+        this.options = options;
     }
 
     public void Run()

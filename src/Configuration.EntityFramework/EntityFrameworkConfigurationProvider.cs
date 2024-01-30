@@ -38,6 +38,11 @@ internal sealed class EntityFrameworkConfigurationProvider : ConfigurationProvid
             storage.CreateSettingTable(_configurationSource.TableName, _configurationSource.Schema);
         }
 
+        if (_configurationSource.InitializeTypes.Any())
+        {
+            storage.SeedDefaultOptions(_configurationSource.InitializeTypes, _configurationSource.ApplicationName);
+        }
+
         Data = ConvertToConfigDictionary(storage.GetAll(_configurationSource.ApplicationName));
     }
 

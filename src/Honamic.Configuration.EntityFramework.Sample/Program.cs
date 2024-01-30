@@ -24,10 +24,15 @@ var builder = new HostBuilder()
     builder.AddEntityFrameworkConfiguration(opt =>
     {
         opt.DbContextOptionsBuilder = (builder) => builder.UseSqlServer(sqlConnectionString);
+        // opt.DbContextOptionsBuilder = (builder) => builder.UseInMemoryDatabase("inmem");
         opt.ApplicationName = null;
-        opt.AutoCreateTable = true;
+        opt.AutoCreateTable = false;
         opt.Schema = "basic";
         opt.TableName = "Options";
+        opt.InitializeTypes = new Dictionary<string, Type>
+        {
+            {"SampleOptions",typeof(SampleOptions)}
+        };
     });
 })
 .ConfigureServices((hostContext, services) =>
@@ -35,13 +40,14 @@ var builder = new HostBuilder()
     Configuration = hostContext.Configuration;
 
     services.AddLogging(configure => configure.AddConsole().AddDebug());
+    services.AddEntityFrameworkConfigurationService();
     services.AddTransient<ITestService, TestService>();
+    services.AddTransient<IChangeOptionService, ChangeOptionService>();
     services.Configure<SampleOptions>(Configuration.GetSection("SampleOptions"));
 });
 
 var host = builder.Build();
 
-// EntityFrameworkConfiguration.Current.SeedDefaultOptions();
 
 //host.Run();
 
@@ -49,6 +55,7 @@ using (var serviceScope = host.Services.CreateScope())
 {
     IServiceProvider services = serviceScope.ServiceProvider;
     var testService = services.GetRequiredService<ITestService>();
+    var changeOptionService = services.GetRequiredService<IChangeOptionService>();
 
 #if DEBUG
     var root = (IConfigurationRoot)Configuration;
@@ -57,7 +64,8 @@ using (var serviceScope = host.Services.CreateScope())
 
 
     testService.Run();
-
+    await changeOptionService.Change();
+    testService.Run();
 
 }
 

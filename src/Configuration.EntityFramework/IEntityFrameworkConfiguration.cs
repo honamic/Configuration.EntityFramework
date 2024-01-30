@@ -14,4 +14,6 @@ public interface IEntityFrameworkConfiguration
 
     public bool AutoCreateTable { get; set; }
 
+    public Dictionary<string, Type> InitializeTypes { get; set; }
+
 }
