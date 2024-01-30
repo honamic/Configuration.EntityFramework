@@ -4,11 +4,11 @@ public class SettingNameValue
 {
     public SettingNameValue(string name, string? value)
     {
-        Name = name;
+        SectionName = name;
         JsonValue = value;
     }
 
-    public string Name { get; set; } = default!;
+    public string SectionName { get; set; } = default!;
 
     public string? JsonValue { get; set; }
 }

@@ -18,11 +18,15 @@ internal class SettingEntityTypeConfiguration : IEntityTypeConfiguration<Setting
     {
         builder.HasKey(model => model.Id);
 
+        builder.HasIndex(m => new { m.Application, m.SectionName })
+            .IsUnique()
+            .HasFilter(null);
+
         builder.Property(model => model.Application)
             .IsRequired(false)
            .HasMaxLength(100);
 
-        builder.Property(model => model.Name)
+        builder.Property(model => model.SectionName)
                 .IsRequired()
                 .HasMaxLength(450);
 

@@ -18,7 +18,7 @@ public class SettingStorage : IDisposable
     {
         return dbContext.Set<Setting>()
                   .Where(option => option.Application == applicationName)
-                  .Select(option => new SettingNameValue(option.Name, option.Value))
+                  .Select(option => new SettingNameValue(option.SectionName, option.Value))
                   .ToList();
     }
 
@@ -52,14 +52,12 @@ public class SettingStorage : IDisposable
 
         var currentSettings = optionDbSet.ToList();
 
-        string? CurrentUserName = ClaimsPrincipal.Current?.Identity?.Name;
-
         foreach (var optionType in optionTypes)
         {
             var sectionName = optionType.Key;
 
             if (!currentSettings.Any(option => option.Application == applicationName
-            && option.Name == sectionName))
+            && option.SectionName == sectionName))
             {
                 var instance = GetInstance(optionType.Value);
 
@@ -67,10 +65,10 @@ public class SettingStorage : IDisposable
                         new Setting
                         {
                             Application = applicationName,
-                            Name = sectionName,
+                            SectionName = sectionName,
                             Value = SerializeSetting(instance),
                             CreatedOn = DateTimeOffset.Now,
-                            CreatedBy = CurrentUserName,
+                            CreatedBy = CurrentUserName(),
                         }
                     ); ;
             }
@@ -83,16 +81,14 @@ public class SettingStorage : IDisposable
     {
         return await dbContext.Set<Setting>().FirstOrDefaultAsync(option =>
                         option.Application == applicationName
-                        && option.Name == sectionName);
+                        && option.SectionName == sectionName);
     }
 
     public void AddOrUpdate<TOption>(TOption options, string sectionName, string? applicationName) where TOption : class
     {
-        string? CurrentUserName = ClaimsPrincipal.Current?.Identity?.Name;
-
         var currentSetting = dbContext.Set<Setting>().FirstOrDefault(option =>
                         option.Application == applicationName
-                        && option.Name == sectionName);
+                        && option.SectionName == sectionName);
 
         if (currentSetting == null)
         {
@@ -100,10 +96,10 @@ public class SettingStorage : IDisposable
                     new Setting
                     {
                         Application = applicationName,
-                        Name = sectionName,
+                        SectionName = sectionName,
                         Value = SerializeSetting(options),
                         CreatedOn = DateTimeOffset.Now,
-                        CreatedBy = CurrentUserName,
+                        CreatedBy = CurrentUserName(),
                     }
                 );
         }
@@ -111,7 +107,7 @@ public class SettingStorage : IDisposable
         {
             currentSetting.Value = SerializeSetting(options);
             currentSetting.ModifiedOn = DateTimeOffset.Now;
-            currentSetting.ModifiedBy = CurrentUserName;
+            currentSetting.ModifiedBy = CurrentUserName();
         }
 
         dbContext.SaveChanges();
@@ -126,8 +122,6 @@ public class SettingStorage : IDisposable
             throw new ArgumentException("the value must be json", nameof(updateSetting.Value));
         }
 
-        string? CurrentUserName = ClaimsPrincipal.Current?.Identity?.Name;
-
         var currentSetting = await dbContext.Set<Setting>().FirstOrDefaultAsync(option =>
                         option.Id == updateSetting.Id);
 
@@ -138,10 +132,10 @@ public class SettingStorage : IDisposable
         else
         {
             currentSetting.Value = currentSetting.Value;
-            currentSetting.Name = currentSetting.Name;
+            currentSetting.SectionName = currentSetting.SectionName;
             currentSetting.Application = currentSetting.Application;
             currentSetting.ModifiedOn = DateTimeOffset.Now;
-            currentSetting.ModifiedBy = CurrentUserName;
+            currentSetting.ModifiedBy = CurrentUserName();
         }
 
         await dbContext.SaveChangesAsync();
@@ -188,5 +182,17 @@ public class SettingStorage : IDisposable
         {
             return false;
         }
+    }
+
+    private static string? CurrentUserName()
+    {
+        var userName = ClaimsPrincipal.Current?.Identity?.Name;
+
+        if (!string.IsNullOrEmpty(userName) && userName.Length > 50)
+        {
+            userName = userName.Substring(0, 50);
+        }
+
+        return userName;
     }
 }

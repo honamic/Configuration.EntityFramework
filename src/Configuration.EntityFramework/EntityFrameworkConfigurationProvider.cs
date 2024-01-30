@@ -64,7 +64,7 @@ internal sealed class EntityFrameworkConfigurationProvider : ConfigurationProvid
               .Select(
                     pair =>
                     {
-                        var key = $"{nameValue.Name}:{pair.Key}".Trim(':');
+                        var key = $"{nameValue.SectionName}:{pair.Key}".Trim(':');
                         return new KeyValuePair<string, string>(key, pair.Value);
                     });
     }

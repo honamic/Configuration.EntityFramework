@@ -27,7 +27,7 @@ var builder = new HostBuilder()
         opt.DbContextOptionsBuilder = (builder) => builder.UseSqlServer(sqlConnectionString);
         // opt.DbContextOptionsBuilder = (builder) => builder.UseInMemoryDatabase("inmem");
         opt.ApplicationName = null;
-        opt.AutoCreateTable = false;
+        opt.AutoCreateTable = true;
         opt.Schema = "basic";
         opt.TableName = "Options";
         opt.InitializeTypes = new Dictionary<string, Type>

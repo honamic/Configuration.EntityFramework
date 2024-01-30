@@ -6,7 +6,7 @@ public class Setting
 
     public string? Application { get; set; }
 
-    public string Name { get; set; } = default!;
+    public string SectionName { get; set; } = default!;
 
     public string? Value { get; set; }
 
